@@ -1,4 +1,44 @@
-  GNU nano 8.7                                                                      module1/SeatReservation.java                                                                      Modified
+import java.time.LocalDate;
+
+public class SeatReservation {
+
+   private String flightDesignator;
+   private LocalDate flightDate;
+   private String firstName;
+   private String lastName;
+
+   public String getFlightDesignator() {
+      return flightDesignator;
+   }
+
+   public void setFlightDesignator(String fd) {
+      flightDesignator = fd;
+   }
+
+   public LocalDate getFlightDate() {
+      return flightDate;
+   }
+
+   public void setFlightDate(LocalDate date) {
+      flightDate = date;
+   }
+
+   public String getFirstName() {
+      return firstName;
+   }
+
+   public void setFirstName(String fn) {
+      firstName = fn;
+   }
+
+   public String getLastName() {
+      return lastName;
+   }
+
+   public void setLastName(String ln) {
+      lastName = ln;
+   }
+
    @Override
    public String toString() {
       return "SeatReservation[" +
@@ -8,52 +48,4 @@
              ", lastName=" + (lastName == null ? "null" : lastName) +
              "]";
    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-^G Help          ^O Write Out     ^F Where Is      ^K Cut           ^T Execute       ^C Location      M-U Undo         M-A Set Mark     M-] To Bracket   M-B Previous     ◂ Back
-^X Exit          ^R Read File     ^\ Replace       ^U Paste         ^J Justify       ^/ Go To Line    M-E Redo         M-6 Copy         ^B Where Was     M-F Next         ▸ Forward
-
+}
