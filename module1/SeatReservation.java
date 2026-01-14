@@ -12,6 +12,9 @@ public class SeatReservation {
    }
 
    public void setFlightDesignator(String fd) {
+      if (fd == null || fd.length() < 4 || fd.length() > 6) {
+         throw new IllegalArgumentException("Invalid flight designator length");
+      }
       flightDesignator = fd;
    }
 
