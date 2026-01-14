@@ -1,4 +1,13 @@
   GNU nano 8.7                                                                      module1/SeatReservation.java                                                                      Modified
+   @Override
+   public String toString() {
+      return "SeatReservation[" +
+             "flightDesignator=" + (flightDesignator == null ? "null" : flightDesignator) +
+             ", flightDate=" + (flightDate == null ? "null" : flightDate) +
+             ", firstName=" + (firstName == null ? "null" : firstName) +
+             ", lastName=" + (lastName == null ? "null" : lastName) +
+             "]";
+   }
 
 
 
