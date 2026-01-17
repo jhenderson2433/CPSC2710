@@ -11,11 +11,11 @@ public class SeatReservation {
       return flightDesignator;
    }
 
-   public void setFlightDesignator(String fd) {
-      if (fd == null){
-      throw new IllegalArgumentException("flight designator cannot be null");
+   public void setFlightDesignator(String designator) {
+      if (designator == null || designator.length() < 4 || designator.length() > 6) {
+        throw new IllegalArgumentException("Invalid flight designator");
       }
-      this.flightDesignator = fd;
+      this.flightDesignator = designator;
    }
 
    public LocalDate getFlightDate() {
@@ -44,11 +44,10 @@ public class SeatReservation {
 
    @Override
    public String toString() {
-      return "SeatReservation[" +
-             "flightDesignator=" + (flightDesignator == null ? "null" : flightDesignator) +
-             ", flightDate=" + (flightDate == null ? "null" : flightDate) +
-             ", firstName=" + (firstName == null ? "null" : firstName) +
-             ", lastName=" + (lastName == null ? "null" : lastName) +
-             "]";
+      return "SeatReservation[[flightDesignator=" + flightDesignator
+            + ",flightDate=" + flightDate
+            + ",firstName=" + firstName
+            + ",lastName=" + lastName
+            + "]]";
    }
 }
