@@ -178,75 +178,95 @@ public class Airport {
 
         InputStream in = Airport.class.getClassLoader().getResourceAsStream(resourceName);
         if (in == null) {
-            throw new IOException("Resource not found: " + resourceName
-                    + " (make sure it is in src/main/resources)");
+            throw new FileNotFoundException("Missing resource: " + resourceName
+                    + " (Put it in src/main/resources)");
         }
 
         List<Airport> airports = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-            // Read header line (we don’t trust it fully because coordinates are split into 2 values)
-            String line = br.readLine();
-            if (line == null) return airports;
 
+            String headerLine = br.readLine();
+            if (headerLine == null) return airports;
+
+            // Use quote-safe CSV splitting
+            List<String> headers = splitCsvLine(headerLine);
+
+            String line;
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
 
-                // Simple CSV split. Your file has no quoted commas in the sample,
-                // so this works for this dataset.
-                String[] parts = line.split(",", -1);
+                List<String> values = splitCsvLine(line);
 
-                // Expected:
-                // Header says 12, but real rows are 13 because longitude + latitude at end.
-                // Handle both just in case.
-                if (parts.length == 13) {
-                    Airport a = new Airport(
-                            emptyToNull(parts[0]),
-                            emptyToNull(parts[1]),
-                            emptyToNull(parts[2]),
-                            parseInteger(parts[3]),
-                            emptyToNull(parts[4]),
-                            emptyToNull(parts[5]),
-                            emptyToNull(parts[6]),
-                            emptyToNull(parts[7]),
-                            emptyToNull(parts[8]),
-                            emptyToNull(parts[9]),
-                            emptyToNull(parts[10]),
-                            parseDouble(parts[11]),  // longitude
-                            parseDouble(parts[12])   // latitude
-                    );
-                    airports.add(a);
-                } else if (parts.length == 12) {
-                    // If coordinates were truly one field (like "lon,lat" quoted),
-                    // you’d parse it here. But your current file rows aren’t that.
-                    // We’ll still support a “best-effort” fallback:
-                    Airport a = new Airport(
-                            emptyToNull(parts[0]),
-                            emptyToNull(parts[1]),
-                            emptyToNull(parts[2]),
-                            parseInteger(parts[3]),
-                            emptyToNull(parts[4]),
-                            emptyToNull(parts[5]),
-                            emptyToNull(parts[6]),
-                            emptyToNull(parts[7]),
-                            emptyToNull(parts[8]),
-                            emptyToNull(parts[9]),
-                            emptyToNull(parts[10]),
-                            null,
-                            null
-                    );
-                    airports.add(a);
-                } else {
-                    // Skip weird lines instead of crashing the whole load
-                    // (you can also throw if your instructor wants strict parsing)
+                // Build header -> value map (safe even if columns move)
+                Map<String, String> row = new HashMap<>();
+                int n = Math.min(headers.size(), values.size());
+                for (int i = 0; i < n; i++) {
+                    row.put(headers.get(i), values.get(i));
                 }
+
+                Airport a = new Airport();
+
+                // ---- Map the columns you showed in your class ----
+                // (These header names MUST match your CSV headers exactly.)
+                a.setIdent(emptyToNull(row.get("ident")));
+                a.setType(emptyToNull(row.get("type")));
+                a.setName(emptyToNull(row.get("name")));
+                a.setElevationFt(parseInteger(row.get("elevation_ft")));
+                a.setContinent(emptyToNull(row.get("continent")));
+                a.setIsoCountry(emptyToNull(row.get("iso_country")));
+                a.setIsoRegion(emptyToNull(row.get("iso_region")));
+                a.setMunicipality(emptyToNull(row.get("municipality")));
+                a.setGpsCode(emptyToNull(row.get("gps_code")));
+                a.setIataCode(emptyToNull(row.get("iata_code")));
+                a.setLocalCode(emptyToNull(row.get("local_code")));
+
+                // ---- Coordinates handling (handles both common formats) ----
+
+                // Case 1: CSV has a single "coordinates" column like:  "-80.2329,40.4915"
+                String coords = row.get("coordinates");
+                if (coords != null && !coords.isBlank()) {
+                    String[] parts = coords.split(",");
+                    if (parts.length == 2) {
+                        Double lon = parseDouble(parts[0].trim());
+                        Double lat = parseDouble(parts[1].trim());
+                        a.setLongitude(lon);
+                        a.setLatitude(lat);
+                    }
+                } else {
+                    // Case 2: CSV has separate longitude/latitude columns
+                    // (Some files use "longitude"/"latitude", others use "lng"/"lat".)
+                    Double lon = parseDouble(firstNonNull(row.get("longitude"), row.get("lng")));
+                    Double lat = parseDouble(firstNonNull(row.get("latitude"), row.get("lat")));
+
+                    // Case 3 (your screenshots suggest this): header count doesn’t include the last two,
+                    // but the row ends with lon,lat anyway. Fallback to "last two values".
+                    if (lon == null || lat == null) {
+                        if (values.size() >= 2) {
+                            Double lastLon = parseDouble(values.get(values.size() - 2));
+                            Double lastLat = parseDouble(values.get(values.size() - 1));
+                            // Only use fallback if they actually look like numbers
+                            if (lon == null) lon = lastLon;
+                            if (lat == null) lat = lastLat;
+                        }
+                    }
+
+                    a.setLongitude(lon);
+                    a.setLatitude(lat);
+                }
+
+                airports.add(a);
             }
         }
 
         return airports;
     }
 
-    // ===== Helpers =====
+// ===== Helpers (paste below readAll, still inside Airport class) =====
+
+    private static String firstNonNull(String a, String b) {
+        return (a != null && !a.isBlank()) ? a : b;
+    }
 
     private static String emptyToNull(String s) {
         if (s == null) return null;
@@ -273,4 +293,31 @@ public class Airport {
             return null;
         }
     }
-}
+
+    // Quote-safe CSV splitter (commas inside quotes won't break columns)
+    private static List<String> splitCsvLine(String line) {
+        List<String> out = new ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+
+            if (c == '"') {
+                // handle escaped quotes ("")
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    cur.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == ',' && !inQuotes) {
+                out.add(cur.toString());
+                cur.setLength(0);
+            } else {
+                cur.append(c);
+            }
+        }
+        out.add(cur.toString());
+        return out;
+    }
