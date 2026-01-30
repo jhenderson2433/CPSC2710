@@ -1,3 +1,5 @@
+package com.example.module3;
+
 /*
  * Project: Airport Mapview App (or your assignment name)
  * Author: Your Name
@@ -8,12 +10,15 @@
  */
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Airport {
 
@@ -35,7 +40,8 @@ public class Airport {
     private Double latitude;
 
     // Optional: empty constructor (useful for JavaFX / frameworks)
-    public Airport() { }
+    public Airport() {
+    }
 
     public String getIdent() {
         return ident;
@@ -167,10 +173,10 @@ public class Airport {
 
     /**
      * Reads airport-codes.csv from the resources folder and returns all airports.
-     *
+     * <p>
      * Put the file here:
-     *   src/main/resources/airport-codes.csv
-     *
+     * src/main/resources/airport-codes.csv
+     * <p>
      * Then this code will load it by resource name (no hard-coded path).
      */
     public static List<Airport> readAll() throws IOException {
@@ -321,3 +327,4 @@ public class Airport {
         out.add(cur.toString());
         return out;
     }
+}

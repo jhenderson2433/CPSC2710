@@ -1,8 +1,9 @@
+package com.example.module3;
+
+import com.example.module3.Airport;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.web.WebView;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -18,9 +19,8 @@ public class AirportController {
     @FXML private TextField countryField;
     @FXML private TextField regionField;
     @FXML private TextField municipalityField;
-
     @FXML private Button searchButton;
-    @FXML private WebView webView;
+
 
     private List<Airport> airports;
 
@@ -92,7 +92,6 @@ public class AirportController {
 
         int zoom = 12; // assignment example uses 12
         String url = "https://www.windy.com/?" + a.getLatitude() + "," + a.getLongitude() + "," + zoom;
-        webView.getEngine().load(url);
     }
 
     private void clearOutput() {
