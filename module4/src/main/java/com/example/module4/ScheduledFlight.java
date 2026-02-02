@@ -1,11 +1,14 @@
 package com.example.module4;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ScheduledFlight {
+public class ScheduledFlight implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String flightDesignator;
     private String departureAirportIdent;
