@@ -1,16 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.module4.FlightDesignatorController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.module4.FlightDesignatorController">
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+    <center>
+        <TableView fx:id="flightsTable">
+            <columns>
+                <TableColumn fx:id="flightCol" text="Flight"/>
+                <TableColumn fx:id="depCol" text="From"/>
+                <TableColumn fx:id="arrCol" text="To"/>
+                <TableColumn fx:id="depTimeCol" text="Dep Time"/>
+                <TableColumn fx:id="arrTimeCol" text="Arr Time"/>
+                <TableColumn fx:id="daysCol" text="Days"/>
+            </columns>
+        </TableView>
+    </center>
+
+    <right>
+        <VBox spacing="8">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Flight Editor"/>
+
+            <TextField fx:id="flightDesignatorField" promptText="Flight Designator"/>
+            <TextField fx:id="departureAirportIdentField" promptText="Departure Airport"/>
+            <TextField fx:id="arrivalAirportIdentField" promptText="Arrival Airport"/>
+            <TextField fx:id="departureTimeField" promptText="Departure Time (H:mm)"/>
+            <TextField fx:id="arrivalTimeField" promptText="Arrival Time (H:mm)"/>
+
+            <Label text="Days of Week"/>
+            <FlowPane hgap="5" vgap="5">
+                <ToggleButton fx:id="monToggle" text="M"/>
+                <ToggleButton fx:id="tueToggle" text="T"/>
+                <ToggleButton fx:id="wedToggle" text="W"/>
+                <ToggleButton fx:id="thuToggle" text="R"/>
+                <ToggleButton fx:id="friToggle" text="F"/>
+                <ToggleButton fx:id="satToggle" text="S"/>
+                <ToggleButton fx:id="sunToggle" text="U"/>
+            </FlowPane>
+
+            <HBox spacing="10">
+                <Button fx:id="addUpdateButton" text="Add" onAction="#onAddOrUpdate"/>
+                <Button fx:id="newButton" text="New" onAction="#onNew"/>
+                <Button fx:id="deleteButton" text="Delete" onAction="#onDelete"/>
+            </HBox>
+        </VBox>
+    </right>
+
+</BorderPane>
