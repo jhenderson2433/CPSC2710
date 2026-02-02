@@ -1,3 +1,11 @@
+/*
+ * Project: Module 4 – Flight Designator App
+ * Author: Javontea Henderson
+ * Email: Jdh0204@auburn.edu
+ * Date: 2026-02-01
+ * Description: JavaFX airline flight app.
+ */
+
 package com.example.module4;
 
 import javafx.application.Application;
