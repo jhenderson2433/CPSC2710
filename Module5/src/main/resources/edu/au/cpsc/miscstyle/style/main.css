@@ -1,0 +1,67 @@
+/* =========================
+   PART 1 — main.css
+   ========================= */
+
+/* 1) Background color
+   Your FXML uses: styleClass="background" on the BorderPane */
+.background {
+    -fx-background-color: #dad7cd;
+}
+
+/* 2) Fill colors for the three top shapes
+   These are styleClasses in your FXML, not ids */
+.foreground {
+    -fx-fill: #272838;
+}
+
+.highlight {
+    -fx-fill: #ff6b6b;
+}
+
+.accent {
+    -fx-fill: #7e7f9a;
+}
+
+/* 3–5) Rectangle inside Group inside VBox
+   You added: id="vbox-rect" to that Rectangle */
+#vbox-rect {
+    -fx-stroke-width: 5px;
+    -fx-stroke: rgb(70, 155, 75);
+    -fx-stroke-type: inside;
+
+    /* Make fill completely transparent so circle behind shows */
+    -fx-fill: transparent;
+}
+
+/* 6) Hyperlinks:
+   - Unvisited: pink + underlined
+   - Visited: dark */
+.hyperlink {
+    -fx-text-fill: #ff6b6b;
+    -fx-underline: true;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: #272838;
+}
+
+/* 7) ComboBox arrow button + arrow
+   Scoped to ComboBox so labels with class "arrow" are not affected */
+.combo-box .arrow-button {
+    -fx-background-color: #ff6b6b;
+}
+
+.combo-box .arrow {
+    -fx-background-color: white;
+}
+
+/* 8) Checkbox checkmark background */
+.check-box:selected .mark {
+    -fx-background-color: #7e7f9a;
+}
+
+/* 9) Button row alignment
+   Your FXML shows: <HBox id="button-row" ...> */
+#button-row {
+    -fx-alignment: center-right;
+}
