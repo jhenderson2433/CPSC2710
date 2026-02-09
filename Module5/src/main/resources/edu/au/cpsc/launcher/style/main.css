@@ -1,0 +1,59 @@
+@font-face {
+    font-family: "InterBlack";
+    src: url("fonts/Inter_28pt-Black.ttf");
+}
+/* Base style for ALL buttons in the launcher grid */
+.button {
+    -fx-font-size: 22px;
+    -fx-font-family: "Inter";
+    -fx-font-weight: 900;
+
+    /* Make them square */
+    -fx-min-width: 260px;
+    -fx-min-height: 220px;
+    -fx-pref-width: 260px;
+    -fx-pref-height: 220px;
+
+    /* Remove rounded corners */
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+
+    /* Optional: border like the example */
+    -fx-border-width: 2px;
+    -fx-border-color: rgba(0,0,0,0.15);
+
+    /* Center the text */
+    -fx-alignment: center;
+
+    /* Keeps the label looking clean */
+    -fx-wrap-text: true;
+}
+
+/* Keep your colors per button */
+#airports-btn {
+    -fx-background-color: #4EA3D8;   /* blue */
+    -fx-text-fill: white;
+}
+
+#seat-reservation-btn {
+    -fx-background-color: #E67E22;   /* orange */
+    -fx-text-fill: white;
+}
+
+#flight-schedule-btn {
+    -fx-background-color: #6CC04A;   /* green */
+    -fx-text-fill: white;
+}
+
+#aircraft-btn {
+    -fx-background-color: #8E6CD8;   /* purple */
+    -fx-text-fill: white;
+}
+
+/* Hover effect (optional but nice) */
+#airports-btn:hover,
+#seat-reservation-btn:hover,
+#flight-schedule-btn:hover,
+#aircraft-btn:hover {
+    -fx-opacity: 0.9;
+}

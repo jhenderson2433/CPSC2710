@@ -27,7 +27,7 @@ public class Part1Application extends Application {
     Scene scene = new Scene(root);
 
     scene.getStylesheets().add(
-            Part1Application.class.getResource("/edu/au/cpsc/miscstyle/style/main.css").toExternalForm()
+            Part1Application.class.getResource("/edu/au/cpsc/launcher/style/main.css").toExternalForm()
     );
 
     stage.setScene(scene);

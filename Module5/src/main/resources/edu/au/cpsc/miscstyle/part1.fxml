@@ -16,7 +16,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Rectangle?>
 
-<BorderPane prefHeight="390.0" prefWidth="517.0" styleClass="background" stylesheets="@style/main.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.au.cpsc.miscstyle.Part1Controller">
+<BorderPane prefHeight="390.0" prefWidth="517.0" styleClass="background" stylesheets="@../launcher/style/main.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.au.cpsc.miscstyle.Part1Controller">
    <bottom>
       <HBox id="button-row" BorderPane.alignment="CENTER">
          <children>
