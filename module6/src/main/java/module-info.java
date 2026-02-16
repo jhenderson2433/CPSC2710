@@ -4,4 +4,6 @@ module module6 {
 
     opens edu.au.cpsc.part1 to javafx.fxml;
     exports edu.au.cpsc.part1;
+    exports edu.au.cpsc.part2;
+    opens edu.au.cpsc.part2 to javafx.fxml;
 }

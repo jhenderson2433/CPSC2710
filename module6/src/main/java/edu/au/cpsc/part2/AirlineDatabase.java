@@ -1,4 +1,4 @@
-package com.example.module4;
+package edu.au.cpsc.part2;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

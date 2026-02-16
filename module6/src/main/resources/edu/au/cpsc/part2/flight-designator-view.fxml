@@ -4,53 +4,90 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17"
+<BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.module4.FlightDesignatorController">
+            fx:controller="edu.au.cpsc.part2.FlightDesignatorController">
 
+    <!-- TOP -->
+    <top>
+        <Label text="Flight Designator App V2" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </Label>
+    </top>
+
+    <!-- CENTER: Table -->
     <center>
-        <TableView fx:id="flightsTable">
+        <TableView fx:id="flightsTable" prefHeight="380.0">
             <columns>
-                <TableColumn fx:id="flightCol" text="Flight"/>
-                <TableColumn fx:id="depCol" text="From"/>
-                <TableColumn fx:id="arrCol" text="To"/>
-                <TableColumn fx:id="depTimeCol" text="Dep Time"/>
-                <TableColumn fx:id="arrTimeCol" text="Arr Time"/>
-                <TableColumn fx:id="daysCol" text="Days"/>
+                <TableColumn fx:id="flightCol" text="Flight" prefWidth="110.0"/>
+                <TableColumn fx:id="depCol" text="Dep" prefWidth="90.0"/>
+                <TableColumn fx:id="arrCol" text="Arr" prefWidth="90.0"/>
+                <TableColumn fx:id="depTimeCol" text="Dep Time" prefWidth="90.0"/>
+                <TableColumn fx:id="arrTimeCol" text="Arr Time" prefWidth="90.0"/>
+                <TableColumn fx:id="daysCol" text="Days" prefWidth="90.0"/>
             </columns>
         </TableView>
     </center>
 
+    <!-- RIGHT: Editor -->
     <right>
-        <VBox spacing="8">
+        <VBox spacing="10.0" prefWidth="320.0">
             <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
+                <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
 
-            <Label text="Flight Editor"/>
+            <Label text="Detail Editor" style="-fx-font-weight: bold;"/>
 
-            <TextField fx:id="flightDesignatorField" promptText="Flight Designator"/>
-            <TextField fx:id="departureAirportIdentField" promptText="Departure Airport"/>
-            <TextField fx:id="arrivalAirportIdentField" promptText="Arrival Airport"/>
-            <TextField fx:id="departureTimeField" promptText="Departure Time (H:mm)"/>
-            <TextField fx:id="arrivalTimeField" promptText="Arrival Time (H:mm)"/>
+            <GridPane hgap="10.0" vgap="10.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="130.0" halignment="RIGHT"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
 
-            <Label text="Days of Week"/>
-            <FlowPane hgap="5" vgap="5">
-                <ToggleButton fx:id="monToggle" text="M"/>
-                <ToggleButton fx:id="tueToggle" text="T"/>
-                <ToggleButton fx:id="wedToggle" text="W"/>
-                <ToggleButton fx:id="thuToggle" text="R"/>
-                <ToggleButton fx:id="friToggle" text="F"/>
-                <ToggleButton fx:id="satToggle" text="S"/>
-                <ToggleButton fx:id="sunToggle" text="U"/>
+                <Label text="Flight Designator:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="flightDesignatorField" promptText="e.g., AA123"
+                           GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                <Label text="Departure Airport:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="departureAirportIdentField" promptText="e.g., ATL"
+                           GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <Label text="Arrival Airport:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="arrivalAirportIdentField" promptText="e.g., BHM"
+                           GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                <Label text="Departure Time:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="departureTimeField" promptText="H:mm (e.g., 6:05)"
+                           GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                <Label text="Arrival Time:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="arrivalTimeField" promptText="H:mm (e.g., 13:30)"
+                           GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            </GridPane>
+
+            <Separator/>
+
+            <Label text="Days of Week:"/>
+            <FlowPane hgap="8" vgap="8">
+                <ToggleButton fx:id="monToggle" text="M" prefWidth="45"/>
+                <ToggleButton fx:id="tueToggle" text="T" prefWidth="45"/>
+                <ToggleButton fx:id="wedToggle" text="W" prefWidth="45"/>
+                <ToggleButton fx:id="thuToggle" text="R" prefWidth="45"/>
+                <ToggleButton fx:id="friToggle" text="F" prefWidth="45"/>
+                <ToggleButton fx:id="satToggle" text="S" prefWidth="45"/>
+                <ToggleButton fx:id="sunToggle" text="U" prefWidth="45"/>
             </FlowPane>
 
-            <HBox spacing="10">
-                <Button fx:id="addUpdateButton" text="Add" onAction="#onAddOrUpdate"/>
-                <Button fx:id="newButton" text="New" onAction="#onNew"/>
-                <Button fx:id="deleteButton" text="Delete" onAction="#onDelete"/>
+            <Separator/>
+
+            <HBox spacing="10.0">
+                <Button fx:id="addUpdateButton" text="Add" onAction="#onAddOrUpdate" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                <Button fx:id="newButton" text="New" onAction="#onNew" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
+                <Button fx:id="deleteButton" text="Delete" onAction="#onDelete" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"/>
             </HBox>
+
         </VBox>
     </right>
 

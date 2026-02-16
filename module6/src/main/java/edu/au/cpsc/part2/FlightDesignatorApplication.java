@@ -6,7 +6,7 @@
  * Description: JavaFX airline flight app.
  */
 
-package com.example.module4;
+package edu.au.cpsc.part2;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

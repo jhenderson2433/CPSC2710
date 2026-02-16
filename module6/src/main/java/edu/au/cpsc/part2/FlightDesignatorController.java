@@ -1,12 +1,10 @@
-package com.example.module4;
+package edu.au.cpsc.part2;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,6 +58,7 @@ public class FlightDesignatorController {
     private AirlineDatabase db;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("H:mm");
+    private FlightDesignatorUiModel model;
 
     // JavaFX calls this automatically after FXML loads
     public void initialize() {
@@ -67,6 +66,86 @@ public class FlightDesignatorController {
 
         // Bind table to DB list
         flightsTable.setItems(db.getScheduledFlights());
+// ----- Bind editor textfields to UI model -----
+        flightDesignatorField.textProperty().bindBidirectional(model.flightDesignatorProperty());
+        departureAirportIdentField.textProperty().bindBidirectional(model.departureAirportProperty());
+        arrivalAirportIdentField.textProperty().bindBidirectional(model.arrivalAirportProperty());
+        departureTimeField.textProperty().bindBidirectional(model.departureTimeProperty());
+        arrivalTimeField.textProperty().bindBidirectional(model.arrivalTimeProperty());
+
+// ----- Bind day toggles -> model days -----
+        Runnable syncDaysToModel = () -> {
+            EnumSet<DayOfWeek> d = EnumSet.noneOf(DayOfWeek.class);
+            if (monToggle.isSelected()) d.add(DayOfWeek.MONDAY);
+            if (tueToggle.isSelected()) d.add(DayOfWeek.TUESDAY);
+            if (wedToggle.isSelected()) d.add(DayOfWeek.WEDNESDAY);
+            if (thuToggle.isSelected()) d.add(DayOfWeek.THURSDAY);
+            if (friToggle.isSelected()) d.add(DayOfWeek.FRIDAY);
+            if (satToggle.isSelected()) d.add(DayOfWeek.SATURDAY);
+            if (sunToggle.isSelected()) d.add(DayOfWeek.SUNDAY);
+            model.daysProperty().set(d);
+        };
+        monToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        tueToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        wedToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        thuToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        friToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        satToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        sunToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
+        syncDaysToModel.run(); // initial
+
+// ----- Button text (optional feature) -----
+        addUpdateButton.textProperty().bind(
+                Bindings.when(model.hasSelectionProperty()).then("Update").otherwise("Add")
+        );
+
+// ----- Enable/Disable rules (REQUIRED rubric parts) -----
+        deleteButton.disableProperty().bind(model.hasSelectionProperty().not());
+
+// New state vs modified state for Add/Update (single button):
+        BooleanBinding addEnabled = model.hasSelectionProperty().not()
+                .and(model.allBlankProperty().not())
+                .and(model.allValidProperty());
+
+        javafx.beans.binding.BooleanBinding updateEnabled = model.hasSelectionProperty()
+                .and(model.modifiedProperty())
+                .and(model.allValidProperty());
+
+        addUpdateButton.disableProperty().bind(addEnabled.or(updateEnabled).not());
+
+// Optional: disable New when editing existing
+        newButton.disableProperty().bind(model.hasSelectionProperty());
+
+// ----- Highlight invalid inputs (REQUIRED) -----
+        flightDesignatorField.styleProperty().bind(
+                Bindings.when(model.flightDesignatorValidProperty())
+                        .then("")
+                        .otherwise("-fx-border-color: red; -fx-border-width: 2;")
+        );
+
+        departureAirportIdentField.styleProperty().bind(
+                Bindings.when(model.departureAirportValidProperty())
+                        .then("")
+                        .otherwise("-fx-border-color: red; -fx-border-width: 2;")
+        );
+
+        arrivalAirportIdentField.styleProperty().bind(
+                Bindings.when(model.arrivalAirportValidProperty())
+                        .then("")
+                        .otherwise("-fx-border-color: red; -fx-border-width: 2;")
+        );
+
+        departureTimeField.styleProperty().bind(
+                Bindings.when(model.departureTimeValidProperty())
+                        .then("")
+                        .otherwise("-fx-border-color: red; -fx-border-width: 2;")
+        );
+
+        arrivalTimeField.styleProperty().bind(
+                Bindings.when(model.arrivalTimeValidProperty())
+                        .then("")
+                        .otherwise("-fx-border-color: red; -fx-border-width: 2;")
+        );
 
         // Column value factories
         flightCol.setCellValueFactory(cell ->
