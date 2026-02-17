@@ -1,9 +1,9 @@
 /*
- * Project: Module 4 – Flight Designator App
+ * Project: Module 6 – Flight Designator App V2
  * Author: Javontea Henderson
- * Email: Jdh0204@auburn.edu
+ * Email: jdh0204@auburn.edu
  * Date: 2026-02-01
- * Description: JavaFX airline flight app.
+ * Description: JavaFX airline flight app (V2) using a UI model for validation and button state.
  */
 
 package edu.au.cpsc.part2;
@@ -18,9 +18,14 @@ import java.io.IOException;
 public class FlightDesignatorApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(FlightDesignatorApplication.class.getResource("flight-designator-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 320, 240);
-        stage.setTitle("Hello!");
+        FXMLLoader fxmlLoader = new FXMLLoader(
+                FlightDesignatorApplication.class.getResource("flight-designator-view.fxml")
+        );
+
+        // Let the FXML determine preferred sizing
+        Scene scene = new Scene(fxmlLoader.load());
+
+        stage.setTitle("Javontea Henderson's Flight Designator App V2");
         stage.setScene(scene);
         stage.show();
     }

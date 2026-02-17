@@ -58,22 +58,49 @@ public class FlightDesignatorController {
     private AirlineDatabase db;
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("H:mm");
+
+    // UI Model (must be initialized before bindings!)
     private FlightDesignatorUiModel model;
 
     // JavaFX calls this automatically after FXML loads
     public void initialize() {
         loadDatabase();
 
+        // IMPORTANT: initialize model BEFORE any bindings that reference it
+        model = new FlightDesignatorUiModel();
+
         // Bind table to DB list
         flightsTable.setItems(db.getScheduledFlights());
-// ----- Bind editor textfields to UI model -----
+
+        // Column value factories
+        flightCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(safe(cell.getValue().getFlightDesignator())));
+
+        depCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(safe(cell.getValue().getDepartureAirportIdent())));
+
+        arrCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(safe(cell.getValue().getArrivalAirportIdent())));
+
+        depTimeCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(cell.getValue().getDepartureTime() == null
+                        ? "" : cell.getValue().getDepartureTime().format(TIME_FMT)));
+
+        arrTimeCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(cell.getValue().getArrivalTime() == null
+                        ? "" : cell.getValue().getArrivalTime().format(TIME_FMT)));
+
+        daysCol.setCellValueFactory(cell ->
+                new SimpleStringProperty(formatDays(cell.getValue())));
+
+        // ----- Bind editor textfields to UI model -----
         flightDesignatorField.textProperty().bindBidirectional(model.flightDesignatorProperty());
         departureAirportIdentField.textProperty().bindBidirectional(model.departureAirportProperty());
         arrivalAirportIdentField.textProperty().bindBidirectional(model.arrivalAirportProperty());
         departureTimeField.textProperty().bindBidirectional(model.departureTimeProperty());
         arrivalTimeField.textProperty().bindBidirectional(model.arrivalTimeProperty());
 
-// ----- Bind day toggles -> model days -----
+        // ----- Bind day toggles -> model days -----
         Runnable syncDaysToModel = () -> {
             EnumSet<DayOfWeek> d = EnumSet.noneOf(DayOfWeek.class);
             if (monToggle.isSelected()) d.add(DayOfWeek.MONDAY);
@@ -85,38 +112,40 @@ public class FlightDesignatorController {
             if (sunToggle.isSelected()) d.add(DayOfWeek.SUNDAY);
             model.daysProperty().set(d);
         };
-        monToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        tueToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        wedToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        thuToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        friToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        satToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        sunToggle.selectedProperty().addListener((o,a,b)->syncDaysToModel.run());
-        syncDaysToModel.run(); // initial
 
-// ----- Button text (optional feature) -----
+        monToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        tueToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        wedToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        thuToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        friToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        satToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        sunToggle.selectedProperty().addListener((o, a, b) -> syncDaysToModel.run());
+        // NOTE: do NOT call syncDaysToModel.run() here; it would mark modified immediately.
+
+        // ----- Button text controlled ONLY by binding (do not call setText on this button) -----
         addUpdateButton.textProperty().bind(
                 Bindings.when(model.hasSelectionProperty()).then("Update").otherwise("Add")
         );
 
-// ----- Enable/Disable rules (REQUIRED rubric parts) -----
+        // ----- Enable/Disable rules -----
         deleteButton.disableProperty().bind(model.hasSelectionProperty().not());
 
-// New state vs modified state for Add/Update (single button):
+        // Add enabled when: no selection, not all blank, all valid
         BooleanBinding addEnabled = model.hasSelectionProperty().not()
                 .and(model.allBlankProperty().not())
                 .and(model.allValidProperty());
 
-        javafx.beans.binding.BooleanBinding updateEnabled = model.hasSelectionProperty()
+        // Update enabled when: selection exists, modified, all valid
+        BooleanBinding updateEnabled = model.hasSelectionProperty()
                 .and(model.modifiedProperty())
                 .and(model.allValidProperty());
 
         addUpdateButton.disableProperty().bind(addEnabled.or(updateEnabled).not());
 
-// Optional: disable New when editing existing
+        // Optional: disable New when editing existing
         newButton.disableProperty().bind(model.hasSelectionProperty());
 
-// ----- Highlight invalid inputs (REQUIRED) -----
+        // ----- Highlight invalid inputs -----
         flightDesignatorField.styleProperty().bind(
                 Bindings.when(model.flightDesignatorValidProperty())
                         .then("")
@@ -147,41 +176,28 @@ public class FlightDesignatorController {
                         .otherwise("-fx-border-color: red; -fx-border-width: 2;")
         );
 
-        // Column value factories
-        flightCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(safe(cell.getValue().getFlightDesignator())));
-
-        depCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(safe(cell.getValue().getDepartureAirportIdent())));
-
-        arrCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(safe(cell.getValue().getArrivalAirportIdent())));
-
-        depTimeCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(cell.getValue().getDepartureTime() == null
-                        ? "" : cell.getValue().getDepartureTime().format(TIME_FMT)));
-
-        arrTimeCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(cell.getValue().getArrivalTime() == null
-                        ? "" : cell.getValue().getArrivalTime().format(TIME_FMT)));
-
-        daysCol.setCellValueFactory(cell ->
-                new SimpleStringProperty(formatDays(cell.getValue())));
-
-        // Selection behavior
+        // Selection behavior (model becomes source of truth)
         flightsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV == null) {
-                clearEditor();
-                addUpdateButton.setText("Add");
+                model.clearForNew();
+                setDayToggles(Set.of()); // also clears toggles without forcing modified via sync
             } else {
-                populateEditorFrom(newV);
-                addUpdateButton.setText("Update");
+                model.loadSelected(
+                        newV.getFlightDesignator(),
+                        newV.getDepartureAirportIdent(),
+                        newV.getArrivalAirportIdent(),
+                        newV.getDepartureTime() == null ? "" : newV.getDepartureTime().format(TIME_FMT),
+                        newV.getArrivalTime() == null ? "" : newV.getArrivalTime().format(TIME_FMT),
+                        newV.getDaysOfWeek()
+                );
+                setDayToggles(newV.getDaysOfWeek()); // model -> toggles
             }
         });
 
         // Start in "Add" mode
         flightsTable.getSelectionModel().clearSelection();
-        addUpdateButton.setText("Add");
+        model.clearForNew();
+        setDayToggles(Set.of());
     }
 
     // ===== Button Handlers =====
@@ -192,20 +208,21 @@ public class FlightDesignatorController {
             ScheduledFlight selected = flightsTable.getSelectionModel().getSelectedItem();
 
             if (selected == null) {
-                // ADD
-                ScheduledFlight sf = buildFromEditor();
+                // ADD (build from model)
+                ScheduledFlight sf = buildFromModel();
                 db.addScheduledFlight(sf);
                 saveDatabase();
                 flightsTable.getSelectionModel().select(sf);
             } else {
-                // UPDATE (modify the selected object in-place)
-                applyEditorToExisting(selected);
+                // UPDATE (apply from model)
+                applyModelToExisting(selected);
                 saveDatabase();
                 flightsTable.refresh();
+                // keep selection; model.modified will be reset by re-loading selection
+                flightsTable.getSelectionModel().select(selected);
             }
 
         } catch (IllegalArgumentException ex) {
-            // Keep it simple: show error in console (you can swap to Alert later)
             System.err.println("Input error: " + ex.getMessage());
         }
     }
@@ -213,88 +230,76 @@ public class FlightDesignatorController {
     @FXML
     private void onNew() {
         flightsTable.getSelectionModel().clearSelection();
-        clearEditor();
-        addUpdateButton.setText("Add");
+        model.clearForNew();
+        setDayToggles(Set.of());
     }
 
     @FXML
     private void onDelete() {
         ScheduledFlight selected = flightsTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            return;
-        }
+        if (selected == null) return;
 
         db.removeScheduledFlight(selected);
         saveDatabase();
 
         flightsTable.getSelectionModel().clearSelection();
-        clearEditor();
-        addUpdateButton.setText("Add");
+        model.clearForNew();
+        setDayToggles(Set.of());
         flightsTable.refresh();
     }
 
-    // ===== Build / Populate Helpers =====
+    // ===== Build / Apply from UI Model =====
 
-    private ScheduledFlight buildFromEditor() {
+    private ScheduledFlight buildFromModel() {
         ScheduledFlight sf = new ScheduledFlight();
 
-        sf.setFlightDesignator(required(flightDesignatorField, "Flight Designator"));
-        sf.setDepartureAirportIdent(required(departureAirportIdentField, "Departure Airport"));
-        sf.setArrivalAirportIdent(required(arrivalAirportIdentField, "Arrival Airport"));
+        sf.setFlightDesignator(required(model.flightDesignatorProperty().get(), "Flight Designator"));
+        sf.setDepartureAirportIdent(required(model.departureAirportProperty().get(), "Departure Airport"));
+        sf.setArrivalAirportIdent(required(model.arrivalAirportProperty().get(), "Arrival Airport"));
 
-        sf.setDepartureTime(parseTime(departureTimeField, "Departure Time (use H:mm like 13:30)"));
-        sf.setArrivalTime(parseTime(arrivalTimeField, "Arrival Time (use H:mm like 15:00)"));
+        sf.setDepartureTime(parseTime(model.departureTimeProperty().get(), "Departure Time (use H:mm like 13:30)"));
+        sf.setArrivalTime(parseTime(model.arrivalTimeProperty().get(), "Arrival Time (use H:mm like 15:00)"));
 
-        Set<DayOfWeek> days = selectedDays();
-        if (days.isEmpty()) {
+        Set<DayOfWeek> days = model.daysProperty().get();
+        if (days == null || days.isEmpty()) {
             throw new IllegalArgumentException("Select at least one day of the week.");
         }
-        sf.setDaysOfWeek(days);
+        sf.setDaysOfWeek(new HashSet<>(days));
 
         return sf;
     }
 
-    private void applyEditorToExisting(ScheduledFlight target) {
-        target.setFlightDesignator(required(flightDesignatorField, "Flight Designator"));
-        target.setDepartureAirportIdent(required(departureAirportIdentField, "Departure Airport"));
-        target.setArrivalAirportIdent(required(arrivalAirportIdentField, "Arrival Airport"));
+    private void applyModelToExisting(ScheduledFlight target) {
+        target.setFlightDesignator(required(model.flightDesignatorProperty().get(), "Flight Designator"));
+        target.setDepartureAirportIdent(required(model.departureAirportProperty().get(), "Departure Airport"));
+        target.setArrivalAirportIdent(required(model.arrivalAirportProperty().get(), "Arrival Airport"));
 
-        target.setDepartureTime(parseTime(departureTimeField, "Departure Time (use H:mm like 13:30)"));
-        target.setArrivalTime(parseTime(arrivalTimeField, "Arrival Time (use H:mm like 15:00)"));
+        target.setDepartureTime(parseTime(model.departureTimeProperty().get(), "Departure Time (use H:mm like 13:30)"));
+        target.setArrivalTime(parseTime(model.arrivalTimeProperty().get(), "Arrival Time (use H:mm like 15:00)"));
 
-        Set<DayOfWeek> days = selectedDays();
-        if (days.isEmpty()) {
+        Set<DayOfWeek> days = model.daysProperty().get();
+        if (days == null || days.isEmpty()) {
             throw new IllegalArgumentException("Select at least one day of the week.");
         }
         target.setDaysOfWeek(new HashSet<>(days));
     }
 
-    private void populateEditorFrom(ScheduledFlight sf) {
-        flightDesignatorField.setText(safe(sf.getFlightDesignator()));
-        departureAirportIdentField.setText(safe(sf.getDepartureAirportIdent()));
-        arrivalAirportIdentField.setText(safe(sf.getArrivalAirportIdent()));
-
-        departureTimeField.setText(sf.getDepartureTime() == null ? "" : sf.getDepartureTime().format(TIME_FMT));
-        arrivalTimeField.setText(sf.getArrivalTime() == null ? "" : sf.getArrivalTime().format(TIME_FMT));
-
-        setDayToggles(sf.getDaysOfWeek());
+    private String required(String value, String label) {
+        String s = value == null ? "" : value.trim();
+        if (s.isEmpty()) throw new IllegalArgumentException(label + " is required.");
+        return s;
     }
 
-    private void clearEditor() {
-        flightDesignatorField.clear();
-        departureAirportIdentField.clear();
-        arrivalAirportIdentField.clear();
-        departureTimeField.clear();
-        arrivalTimeField.clear();
-
-        monToggle.setSelected(false);
-        tueToggle.setSelected(false);
-        wedToggle.setSelected(false);
-        thuToggle.setSelected(false);
-        friToggle.setSelected(false);
-        satToggle.setSelected(false);
-        sunToggle.setSelected(false);
+    private LocalTime parseTime(String value, String message) {
+        String s = value == null ? "" : value.trim();
+        try {
+            return LocalTime.parse(s, TIME_FMT);
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(message);
+        }
     }
+
+    // ===== Days helpers =====
 
     private void setDayToggles(Set<DayOfWeek> days) {
         if (days == null) days = Set.of();
@@ -306,18 +311,6 @@ public class FlightDesignatorController {
         friToggle.setSelected(days.contains(DayOfWeek.FRIDAY));
         satToggle.setSelected(days.contains(DayOfWeek.SATURDAY));
         sunToggle.setSelected(days.contains(DayOfWeek.SUNDAY));
-    }
-
-    private Set<DayOfWeek> selectedDays() {
-        EnumSet<DayOfWeek> days = EnumSet.noneOf(DayOfWeek.class);
-        if (monToggle.isSelected()) days.add(DayOfWeek.MONDAY);
-        if (tueToggle.isSelected()) days.add(DayOfWeek.TUESDAY);
-        if (wedToggle.isSelected()) days.add(DayOfWeek.WEDNESDAY);
-        if (thuToggle.isSelected()) days.add(DayOfWeek.THURSDAY);
-        if (friToggle.isSelected()) days.add(DayOfWeek.FRIDAY);
-        if (satToggle.isSelected()) days.add(DayOfWeek.SATURDAY);
-        if (sunToggle.isSelected()) days.add(DayOfWeek.SUNDAY);
-        return days;
     }
 
     private String formatDays(ScheduledFlight sf) {
@@ -335,21 +328,6 @@ public class FlightDesignatorController {
         return sb.toString();
     }
 
-    private String required(TextField tf, String label) {
-        String s = tf.getText() == null ? "" : tf.getText().trim();
-        if (s.isEmpty()) throw new IllegalArgumentException(label + " is required.");
-        return s;
-    }
-
-    private LocalTime parseTime(TextField tf, String message) {
-        String s = tf.getText() == null ? "" : tf.getText().trim();
-        try {
-            return LocalTime.parse(s, TIME_FMT);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(message);
-        }
-    }
-
     private String safe(String s) {
         return s == null ? "" : s;
     }
@@ -357,7 +335,6 @@ public class FlightDesignatorController {
     // ===== Persistence =====
 
     private Path getDbPath() {
-        // Relative file name (no absolute paths)
         return Paths.get(DB_FILE);
     }
 
